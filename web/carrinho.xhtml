@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="./temp/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="content">
+        <h2>Carrinho de Compras</h2>
+        
+        <h:form id="formCarrinhoDeCompras">
+            <p:messages autoUpdate="true" />
+            <p:dataTable id="listaItens" 
+                         value="#{beanCarrinho.pedidoCarrinho.itensOrdenadosEmLista}"
+                         var="item"
+                         styleClass="lista-conteudo"
+                         emptyMessage="carrinho vazio">
+                <p:column style="width:60%" headerText="produto">
+                    <h:outputText value="#{item.produto.titulo}" />
+                </p:column>
+                
+                <p:column style="width:60%" headerText="quantidade">
+                    <p:inputText value="#{item.quantidade}" 
+                                 id="quantidade" 
+                                 size="3"
+                                 maxlength="2"
+                                 label="#{quantidade}">
+                        <p:ajax update="listaItens"
+                                listener="#{beanCarrinho.recalcularTotal(item)}" />
+                    </p:inputText>
+                    <f:facet name="footer">
+                        <h:outputLabel value="Valor total" />
+                    </f:facet>
+                </p:column>
+                
+                <p:column headerText="valor total" style="width:15%;text-align:right">
+                    <h:outputText value="#{item.precoTotal}">
+                        <f:convertNumber currencyCode="BRL" type="currency" />
+                    </h:outputText>
+                    <f:facet name="footer">
+                        <h:outputText value="#{beanCarrinho.pedidoCarrinho.valorTotal}">
+                            <f:convertNumber currencyCode="BRL" type="currency" />
+                        </h:outputText>
+                    </f:facet>
+                </p:column>
+                
+                <p:column headerText="remover">
+                    <p:commandButton icon="ui-icon-close" 
+                                     oncomplete="dialogConfirmaRemocaoProduto.show()"
+                                     process="@this">
+                        <f:setPropertyActionListener value="#{item.produto}" target="#{beanCarrinho.produtoRemover}" />
+                    </p:commandButton>
+                </p:column>                
+            </p:dataTable>
+            <h:link outcome="index" value="continuar comprando" />
+            
+            <p:panel id="panelClienteCadastro" 
+                     header="Já sou cliente" 
+                     styleClass="panel-conteudo"
+                     toggleable="true" 
+                     rendered="#{beanCarrinho.temItems()}">
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="email" for="textCadastroEmail" />
+                    <p:inputText value="#{beanCarrinho.cliente.email}" 
+                                 id="txtCadastroEmail" 
+                                 size="25"
+                                 maxlength="40"
+                                 required="true"
+                                 label="email" />
+                    <h:outputLabel value="senha" for="txtCadastroSenha" />
+                    <p:password value="#{beanCarrinho.cliente.senha}" 
+                                id="txtCadastroSenha"
+                                size="8"
+                                maxlength="8"
+                                required="true"
+                                label="senha" />
+                </h:panelGrid>
+                <p:commandButton action="#{beanCarrinho.fecharPedidoUsuarioExistente()}"
+                                 value="finalizar compra"
+                                 process="panelNovoCliente"
+                                 update="panelClienteCadastro" />
+            </p:panel>
+            
+            <p:panel id="panelNovoCliente" 
+                     header="sou novo cliente"
+                     styleClass="panel-conteudo"
+                     collapsed="true"
+                     toggleable="ture"
+                     rendered="#{beanCarrinho.temItems()}">
+            
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="nome" for="txtNovoNome" />
+                    <p:inputText value="#{beanCarrinho.cliente.nome}"
+                                 id="txtNovoNome"
+                                 size="30"
+                                 maxlength="40"
+                                 required="true"
+                                 label="true" />
+                    <h:outputLabel value="senha" for="txtNovaSenha" />
+                    <p:password value="#{beanCarrinho.cliente.senha}" 
+                                id="txtNovaSenha"
+                                size="8"
+                                maxlength="8"
+                                required="true"
+                                label="senha">
+                        <f:validateLength minimum="6" maximum="8" />
+                    </p:password>                                   
+                </h:panelGrid>   
+                
+                <p:commandButton action="#{beanCarrinho.fecharPedidoNovoUsuario()}"
+                                 value="cadastrar e finalizar compra"
+                                 process="panelNovoCliente"
+                                 update="panelNovoCliente" />
+            </p:panel>            
+            
+            <p:confirmDialog id="dialogRemoverProduto" 
+                             widgetVar="dialogConfirmaRemocaoProduto"
+                             message="confirmar remocao item">
+                <p:commandButton value="sim" 
+                                 action="#{beanCarrinho.removerItem()}"
+                                 process="@this"
+                                 update="@form"
+                                 oncomplete="dialgonConfirmaRemocaoProduto.hide()" />
+                <p:commandButton value="nao" immediate="true" process="@this" 
+                                 onclick="dialogConfirmaRemocaoProduto.hide();" />
+            </p:confirmDialog>            
+        </h:form>        
+    </ui:define>
+</ui:composition>

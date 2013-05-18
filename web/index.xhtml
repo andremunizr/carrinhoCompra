@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="./temp/template.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:define name="content">
+        <h2>Listagem de Produtos</h2>
+        <h:form id="formProdutos">
+            <p:growl autoUpdate="true" />
+            <p:dataGrid id="listaProdutos" value="#{beanProduto.produtos}" var="produto" columns="1">
+                <table style="width:100%;margin-top:10px;border:1px solid green">
+                    <tr>
+                        <td style="width:20%">
+                            <h:graphicImage name="#{produto.nomeImagem}" library="img" />
+                        </td>
+                        <td style="width:55%;text-align:left">
+                            <h:outputText value="#{produto.titulo}" styleClass="titulo-produto" />
+                            <span class="resumo-produto">
+                                <h:outputText value="#{produto.descricao}" escape="false" />
+                            </span>
+                        </td>
+                        <td class="coluna" style="width:25%;text-align:center">
+                            <h:outputText value="#{produto.preco}">
+                                <f:convertNumber currencyCode="BRL" type="currency" />
+                            </h:outputText>
+                            <br />
+                            <p:commandButton icon="ui-icon-cart" 
+                                            value="Adicionar ao carrinho"
+                                            action="#{BeanCarrinho.adicionarItem(produto)}"
+                                            process="listaProdutos" 
+                                            style="margin-top:15px" />                            
+                        </td>
+                    </tr>
+                </table>
+            </p:dataGrid>
+        </h:form>
+        
+    </ui:define>
+</ui:composition>
